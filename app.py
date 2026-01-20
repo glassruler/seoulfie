@@ -29,13 +29,13 @@ ROOT_FOLDER_IDS = st.secrets["roots"]["folder_ids"]
 # ----------------------------
 # Helpers
 # ----------------------------
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=300)
 def get_folder_name(folder_id: str) -> str:
     meta = drive.files().get(fileId=folder_id, fields="name").execute()
     return meta["name"]
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=300)
 def list_folders(parent_id: str):
     q = f"'{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
     results = drive.files().list(
@@ -47,7 +47,7 @@ def list_folders(parent_id: str):
     return results.get("files", [])
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=300)
 def list_images(parent_id: str):
     q = f"'{parent_id}' in parents and (mimeType contains 'image/') and trashed=false"
     results = drive.files().list(
@@ -114,6 +114,10 @@ def render_gallery(images, cols=4, max_size=(2000, 2000)):
 # UI
 # ----------------------------
 st.title("📸 Seoulfie Photo Gallery")
+
+if st.sidebar.button("🔄 Refresh Drive Data"):
+    st.cache_data.clear()
+    st.rerun()
 
 #st.caption("Private gallery: images are fetched securely via Google Drive API (Service Account).")
 
